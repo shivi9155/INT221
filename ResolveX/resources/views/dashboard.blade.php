@@ -1,19 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="top">
-    <div>
-        <h1 class="title">Dashboard</h1>
-        <p class="subtitle">SLA, workload, and resolution overview.</p>
+<section class="hero-panel" style="margin-bottom:18px;">
+    <div class="top" style="margin-bottom:0; position:relative; z-index:1;">
+        <div>
+            <h1 class="title" style="color:#f4fbff;">Dashboard</h1>
+            <p class="subtitle">SLA, workload, and resolution overview.</p>
+        </div>
+        <a class="btn" href="{{ route('grievances.create') }}" style="background:linear-gradient(135deg, #ee6c4d, #c95a3e); border-color:#ee6c4d;">New grievance</a>
     </div>
-    <a class="btn" href="{{ route('grievances.create') }}">New grievance</a>
-</div>
+</section>
 
 <section class="grid grid-4">
-    <div class="card"><div class="muted">Total tickets</div><div class="stat">{{ $stats['total'] }}</div></div>
-    <div class="card"><div class="muted">Pending</div><div class="stat">{{ $stats['pending'] }}</div></div>
-    <div class="card"><div class="muted">Resolved</div><div class="stat">{{ $stats['resolved'] }}</div></div>
-    <div class="card"><div class="muted">High priority</div><div class="stat">{{ $stats['high'] }}</div></div>
+    <div class="card"><div class="muted">Total tickets</div><div class="stat">{{ $stats['total'] }}</div><div class="subtitle">All visible grievances in your current scope.</div></div>
+    <div class="card"><div class="muted">Pending</div><div class="stat">{{ $stats['pending'] }}</div><div class="subtitle">Open issues waiting for action or closure.</div></div>
+    <div class="card"><div class="muted">Resolved</div><div class="stat">{{ $stats['resolved'] }}</div><div class="subtitle">Successfully closed tickets so far.</div></div>
+    <div class="card"><div class="muted">High priority</div><div class="stat">{{ $stats['high'] }}</div><div class="subtitle">Cases that need faster intervention.</div></div>
 </section>
 
 <section class="grid grid-2" style="margin-top:16px">

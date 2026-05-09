@@ -20,8 +20,10 @@ class DatabaseSeeder extends Seeder
                 ...$user,
                 'startup_name' => 'NovaWorks',
                 'phone' => '9999999999',
-                'password' => 'password',
+                'password' => bcrypt('password'),
             ]);
         }
+
+        $this->call(GrievanceSeeder::class);
     }
 }
