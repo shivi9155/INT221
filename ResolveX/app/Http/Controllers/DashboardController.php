@@ -20,6 +20,8 @@ class DashboardController extends Controller
             'pending' => (clone $baseQuery)->whereNot('status', 'Resolved')->count(),
             'resolved' => (clone $baseQuery)->where('status', 'Resolved')->count(),
             'high' => (clone $baseQuery)->where('priority', 'High')->count(),
+            'escalated' => (clone $baseQuery)->whereNotNull('escalated_at')->count(),
+            'overdue' => (clone $baseQuery)->where('status', '!=', 'Resolved')->whereNotNull('due_at')->where('due_at', '<', now())->count(),
         ];
 
         $monthly = (clone $baseQuery)
@@ -30,11 +32,16 @@ class DashboardController extends Controller
             ->pluck('total', 'month');
 
         $recent = (clone $baseQuery)
-            ->with(['user', 'assignee'])
+            ->with(['user', 'assignee', 'feedback'])
             ->latest()
             ->limit(8)
             ->get();
 
-        return view('dashboard', compact('stats', 'monthly', 'recent'));
+        return view('dashboard', [
+            'stats' => $stats,
+            'monthly' => $monthly,
+            'recent' => $recent,
+            'notifications' => $user->notifications()->latest()->limit(5)->get(),
+        ]);
     }
 }

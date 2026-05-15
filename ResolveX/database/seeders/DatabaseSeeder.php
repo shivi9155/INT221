@@ -18,8 +18,12 @@ class DatabaseSeeder extends Seeder
         foreach ($users as $user) {
             User::updateOrCreate(['email' => $user['email']], [
                 ...$user,
+                'user_type' => $user['role'] === 'user' ? 'founder' : 'employee',
                 'startup_name' => 'NovaWorks',
                 'phone' => '9999999999',
+                'is_active' => true,
+                'wants_email_notifications' => true,
+                'wants_in_app_notifications' => true,
                 'password' => bcrypt('password'),
             ]);
         }

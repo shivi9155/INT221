@@ -2,8 +2,9 @@
 
 @section('content')
 <section class="card">
-    <h1 class="title">Create account</h1>
-    <p class="subtitle">Register as a founder or employee.</p>
+    <span class="soft-note">Onboard your startup team</span>
+    <h1 class="title" style="margin-top:18px;">Create account</h1>
+    <p class="subtitle">Register as a founder or employee and start managing issues in a more structured way.</p>
 
     <form method="POST" action="{{ route('register') }}" class="grid" style="margin-top:20px">
         @csrf
@@ -16,10 +17,17 @@
             <input name="email" type="email" value="{{ old('email') }}" required>
         </div>
         <div>
+            <label>Startup role</label>
+            <select name="user_type" required>
+                <option value="founder" @selected(old('user_type', 'founder') === 'founder')>Founder</option>
+                <option value="employee" @selected(old('user_type') === 'employee')>Employee</option>
+            </select>
+        </div>
+        <div>
             <label>Startup name</label>
             <input name="startup_name" value="{{ old('startup_name') }}">
         </div>
-        <div>
+        <div class="full">
             <label>Phone</label>
             <input name="phone" value="{{ old('phone') }}">
         </div>

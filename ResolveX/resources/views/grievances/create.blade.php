@@ -26,6 +26,9 @@
         <label>Description</label>
         <textarea name="description" required>{{ old('description') }}</textarea>
     </div>
+    <div class="full">
+        <p class="subtitle" style="margin:0">The platform will classify the complaint, estimate sentiment, and assign an SLA automatically after submission.</p>
+    </div>
     <div>
         <label>Attachment</label>
         <input name="attachment" type="file" accept=".pdf,.png,.jpg,.jpeg">

@@ -3,111 +3,86 @@
 @section('title', 'Grievance Details - ' . $grievance->ticket_id)
 
 @section('admin-content')
-<div class="grid grid-2 gap-6">
-    <!-- Grievance Details -->
-    <div class="card">
-        <h2 style="margin-bottom: 20px; font-size: 20px; font-weight: bold;">Grievance Details</h2>
+<div class="stack">
+    <div class="grid grid-2">
+        <section class="card">
+            <h2 style="margin-top:0">Grievance details</h2>
+            <p><strong>Ticket ID:</strong> {{ $grievance->ticket_id }}</p>
+            <p><strong>Subject:</strong> {{ $grievance->subject }}</p>
+            <p><strong>Status:</strong> <span class="badge {{ str_replace(' ', '', $grievance->status) }}">{{ $grievance->status }}</span></p>
+            <p><strong>Priority:</strong> <span class="badge {{ $grievance->priority }}">{{ $grievance->priority }}</span></p>
+            <p><strong>Category:</strong> {{ $grievance->category }}</p>
+            <p><strong>AI category:</strong> {{ $grievance->ai_category ?? 'Pending' }}</p>
+            <p><strong>Sentiment:</strong> <span class="badge {{ $grievance->sentiment_label ?? 'Neutral' }}">{{ $grievance->sentiment_label ?? 'Neutral' }}</span></p>
+            <p><strong>SLA deadline:</strong> {{ $grievance->due_at?->format('d M Y, h:i A') ?? 'Not set' }}</p>
+            <p><strong>Escalated to:</strong> {{ $grievance->escalatedTo?->name ?? 'Not escalated' }}</p>
+            <p><strong>Assigned moderator:</strong> {{ $grievance->assignee?->name ?? 'Unassigned' }}</p>
+            <p><strong>Submitted by:</strong>
+                @if($grievance->is_anonymous)
+                    Anonymous
+                @else
+                    {{ $grievance->user?->name ?? 'User removed' }} ({{ $grievance->user?->email ?? 'No email' }})
+                @endif
+            </p>
+            <p><strong>Description:</strong></p>
+            <p style="white-space:pre-wrap;">{{ $grievance->description }}</p>
+            @if ($grievance->attachment_path)
+                <a class="btn secondary" href="{{ asset('storage/'.$grievance->attachment_path) }}" target="_blank">Open attachment</a>
+            @endif
+        </section>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div>
-                <label style="font-weight: bold;">Ticket ID:</label>
-                <p>{{ $grievance->ticket_id }}</p>
-            </div>
+        <section class="card">
+            <h2 style="margin-top:0">Moderation controls</h2>
+            <form method="POST" action="{{ route('admin.grievances.update', $grievance) }}" class="grid">
+                @csrf
+                @method('PUT')
+                <div>
+                    <label>Status</label>
+                    <select name="status">@foreach($statuses as $status)<option @selected($grievance->status === $status)>{{ $status }}</option>@endforeach</select>
+                </div>
+                <div>
+                    <label>Assign to</label>
+                    <select name="assigned_to">
+                        <option value="">Unassigned</option>
+                        @foreach ($moderators as $moderator)
+                            <option value="{{ $moderator->id }}" @selected($grievance->assigned_to === $moderator->id)>{{ $moderator->name }} ({{ $moderator->role }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="full">
+                    <label>Admin reply</label>
+                    <textarea name="admin_reply" placeholder="Share progress, ask for clarification, or document decisions."></textarea>
+                </div>
+                <div class="full">
+                    <label>Resolution summary</label>
+                    <textarea name="resolution_summary">{{ old('resolution_summary', $grievance->resolution_summary) }}</textarea>
+                </div>
+                <button class="btn" type="submit">Save update</button>
+            </form>
+        </section>
+    </div>
 
-            <div>
-                <label style="font-weight: bold;">Status:</label>
-                <p><span class="badge">{{ $grievance->status }}</span></p>
-            </div>
-
-            <div>
-                <label style="font-weight: bold;">Priority:</label>
-                <p><span class="badge {{ $grievance->priority }}">{{ $grievance->priority }}</span></p>
-            </div>
-
-            <div>
-                <label style="font-weight: bold;">Category:</label>
-                <p><span class="badge">{{ $grievance->category }}</span></p>
-            </div>
-
-            <div class="full">
-                <label style="font-weight: bold;">Subject:</label>
-                <p>{{ $grievance->subject }}</p>
-            </div>
-
-            <div class="full">
-                <label style="font-weight: bold;">Description:</label>
-                <p style="white-space: pre-wrap;">{{ $grievance->description }}</p>
-            </div>
-
-            <div>
-                <label style="font-weight: bold;">Submitted:</label>
-                <p>{{ $grievance->created_at->format('M d, Y H:i') }}</p>
-            </div>
-
-            <div>
-                <label style="font-weight: bold;">User:</label>
-                <p>
-                    @if($grievance->is_anonymous)
-                        <span class="badge">Anonymous</span>
-                    @else
-                        <strong>{{ $grievance->user->name }}</strong><br>
-                        <small style="color: var(--muted);">{{ $grievance->user->email }}</small>
-                    @endif
-                </p>
-            </div>
+    <section class="card">
+        <h2 style="margin-top:0">Timeline and chat</h2>
+        <div class="timeline">
+            @forelse($grievance->updates->sortByDesc('created_at') as $update)
+                <div class="event">
+                    <strong>{{ $update->user?->name ?? 'System' }}</strong>
+                    <div class="muted">{{ $update->created_at->format('d M Y, h:i A') }} | {{ $update->status ?? 'Comment' }}</div>
+                    <p>{{ $update->note }}</p>
+                </div>
+            @empty
+                <p class="muted">No updates recorded yet.</p>
+            @endforelse
         </div>
-    </div>
+    </section>
 
-    <!-- Update Status & Reply -->
-    <div class="card">
-        <h2 style="margin-bottom: 20px; font-size: 20px; font-weight: bold;">Update & Reply</h2>
-
-        <form method="POST" action="{{ route('admin.grievances.update', $grievance) }}">
-            @csrf
-            @method('PUT')
-
-            <div style="margin-bottom: 16px;">
-                <label for="status" style="display: block; font-weight: bold; margin-bottom: 6px;">Status:</label>
-                <select name="status" id="status" style="width: 100%;">
-                    <option value="Submitted" {{ $grievance->status === 'Submitted' ? 'selected' : '' }}>Submitted</option>
-                    <option value="Under Review" {{ $grievance->status === 'Under Review' ? 'selected' : '' }}>Under Review</option>
-                    <option value="In Progress" {{ $grievance->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                    <option value="Resolved" {{ $grievance->status === 'Resolved' ? 'selected' : '' }}>Resolved</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom: 16px;">
-                <label for="admin_reply" style="display: block; font-weight: bold; margin-bottom: 6px;">Admin Reply:</label>
-                <textarea name="admin_reply" id="admin_reply" rows="6" placeholder="Type your reply to the user here..."></textarea>
-            </div>
-
-            <div style="display: flex; gap: 12px;">
-                <button type="submit" class="btn">💾 Save Changes</button>
-                <a href="{{ route('admin.dashboard') }}" class="btn secondary">⬅️ Back to Dashboard</a>
-            </div>
-        </form>
-    </div>
+    @if ($grievance->feedback)
+        <section class="card">
+            <h2 style="margin-top:0">Post-resolution feedback</h2>
+            <p><strong>Rating:</strong> {{ $grievance->feedback->rating }}/5</p>
+            <p>{{ $grievance->feedback->comments ?: 'No written feedback provided.' }}</p>
+        </section>
+    @endif
 </div>
-
-<!-- Previous Updates/Replies -->
-@if($grievance->updates->count() > 0)
-<div class="card" style="margin-top: 24px;">
-    <h2 style="margin-bottom: 20px; font-size: 20px; font-weight: bold;">Communication History</h2>
-
-    <div class="timeline">
-        @foreach($grievance->updates->sortByDesc('created_at') as $update)
-            <div class="event">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong>{{ $update->user->name }}</strong>
-                    <small style="color: var(--muted);">{{ $update->created_at->diffForHumans() }}</small>
-                </div>
-                <div style="color: var(--muted); font-size: 12px; margin-bottom: 8px;">
-                    Status: {{ $update->status ?? 'Update' }}
-                </div>
-                <p>{{ $update->note }}</p>
-            </div>
-        @endforeach
-    </div>
-</div>
-@endif
 @endsection

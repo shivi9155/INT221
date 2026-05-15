@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Grievance;
 use App\Models\Feedback;
-use App\Models\User;
 use App\Models\GrievanceUpdate;
+use App\Models\User;
+use App\Notifications\GrievanceActivityNotification;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Collection;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -18,21 +19,57 @@ class AdminController extends Controller
 {
     public function dashboard(): View
     {
-        $grievances = Grievance::with(['user', 'assignee'])
-            ->latest()
-            ->paginate(20);
+        $query = Grievance::with(['user', 'assignee', 'escalatedTo'])->latest();
+
+        foreach (['priority', 'category', 'status'] as $filter) {
+            if (request()->filled($filter)) {
+                $query->where($filter, request()->string($filter));
+            }
+        }
+
+        if (request()->filled('date_from')) {
+            $query->whereDate('created_at', '>=', request()->date('date_from'));
+        }
+
+        if (request()->filled('date_to')) {
+            $query->whereDate('created_at', '<=', request()->date('date_to'));
+        }
+
+        if (request()->filled('search')) {
+            $search = request()->string('search');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('ticket_id', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $grievances = $query->paginate(20)->withQueryString();
+
+        $stats = [
+            'total' => Grievance::count(),
+            'resolved' => Grievance::where('status', 'Resolved')->count(),
+            'escalated' => Grievance::whereNotNull('escalated_at')->count(),
+            'overdue' => Grievance::where('status', '!=', 'Resolved')->whereNotNull('due_at')->where('due_at', '<', now())->count(),
+        ];
 
         return view('admin.dashboard', [
             'grievances' => $grievances,
+            'stats' => $stats,
+            'categories' => Grievance::CATEGORIES,
+            'priorities' => Grievance::PRIORITIES,
+            'statuses' => Grievance::STATUSES,
         ]);
     }
 
     public function show(Grievance $grievance): View
     {
-        $grievance->load(['user', 'assignee', 'updates.user']);
+        $grievance->load(['user', 'assignee', 'escalatedTo', 'updates.user', 'feedback']);
 
         return view('admin.show', [
             'grievance' => $grievance,
+            'moderators' => User::whereIn('role', ['admin', 'moderator'])->orderBy('name')->get(),
+            'statuses' => Grievance::STATUSES,
         ]);
     }
 
@@ -42,25 +79,37 @@ class AdminController extends Controller
             'status' => 'required|in:Submitted,Under Review,In Progress,Resolved',
             'assigned_to' => 'nullable|exists:users,id',
             'admin_reply' => 'nullable|string|max:1000',
+            'resolution_summary' => 'nullable|string|max:1500',
         ]);
 
         $grievance->update([
             'status' => $request->status,
             'assigned_to' => $request->assigned_to ?: null,
             'resolved_at' => $request->status === 'Resolved' ? now() : null,
+            'resolution_summary' => $request->resolution_summary ?: $grievance->resolution_summary,
         ]);
 
-        // If admin added a reply, create an update
-        if ($request->filled('admin_reply')) {
-            GrievanceUpdate::create([
-                'grievance_id' => $grievance->id,
-                'user_id' => $request->user()->id,
-                'status' => $request->status,
-                'note' => $request->admin_reply,
+        GrievanceUpdate::create([
+            'grievance_id' => $grievance->id,
+            'user_id' => $request->user()->id,
+            'status' => $request->status,
+            'note' => $request->filled('admin_reply') ? $request->admin_reply : 'Admin updated the ticket.',
+        ]);
+
+        if ($grievance->status !== 'Resolved' && $grievance->due_at && $grievance->due_at->isPast()) {
+            $grievance->update([
+                'escalated_at' => $grievance->escalated_at ?? now(),
+                'escalated_to' => auth()->id(),
             ]);
         }
 
-        return redirect()->back()->with('success', 'Grievance updated successfully!');
+        $grievance->user?->notify(new GrievanceActivityNotification(
+            $grievance,
+            'Complaint status updated',
+            'Your grievance was updated by the admin team.'
+        ));
+
+        return redirect()->back()->with('status', 'Grievance updated successfully!');
     }
 
     public function analytics(): View
@@ -69,7 +118,7 @@ class AdminController extends Controller
         $totalGrievances = $grievances->count();
         $resolvedCount = $grievances->where('status', 'Resolved')->count();
         $pendingCount = $grievances->where('status', '!=', 'Resolved')->count();
-        $escalatedCount = $grievances->where('status', 'Escalated')->count();
+        $escalatedCount = $grievances->whereNotNull('escalated_at')->count();
 
         $responseHours = $grievances
             ->map(function (Grievance $grievance): ?float {
@@ -196,6 +245,58 @@ class AdminController extends Controller
 
             fclose($handle);
         }, 200, $headers);
+    }
+
+    public function users(Request $request): View
+    {
+        $query = User::query()->withCount('grievances')->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('startup_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->string('role'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->string('status') === 'active');
+        }
+
+        return view('admin.users', [
+            'users' => $query->paginate(12)->withQueryString(),
+            'stats' => [
+                'total_users' => User::count(),
+                'admin_count' => User::where('role', 'admin')->count(),
+                'moderator_count' => User::where('role', 'moderator')->count(),
+                'user_count' => User::where('role', 'user')->count(),
+            ],
+        ]);
+    }
+
+    public function updateUserRole(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'role' => ['required', 'in:admin,moderator,user'],
+        ]);
+
+        $user->update(['role' => $data['role']]);
+
+        return back()->with('status', $user->name.' is now a '.$data['role'].'.');
+    }
+
+    public function toggleUserStatus(User $user): RedirectResponse
+    {
+        abort_if(auth()->id() === $user->id, 422, 'You cannot deactivate your own account.');
+
+        $user->update(['is_active' => ! $user->is_active]);
+
+        return back()->with('status', $user->name.' account status updated.');
     }
 
     private function buildMonthlyCounts(): Collection

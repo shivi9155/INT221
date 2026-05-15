@@ -26,6 +26,12 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
         }
 
+        if ($request->user()?->is_active === false) {
+            Auth::logout();
+
+            return back()->withErrors(['email' => 'Your account is currently inactive. Please contact an administrator.'])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
@@ -42,6 +48,7 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:6'],
+            'user_type' => ['required', 'in:founder,employee'],
             'startup_name' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
@@ -51,6 +58,7 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => 'user',
+            'user_type' => $data['user_type'],
             'startup_name' => $data['startup_name'] ?? null,
             'phone' => $data['phone'] ?? null,
         ]);

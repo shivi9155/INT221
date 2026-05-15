@@ -20,20 +20,30 @@ class Grievance extends Model
         'ticket_id',
         'user_id',
         'assigned_to',
+        'escalated_to',
         'category',
+        'ai_category',
         'subject',
         'description',
         'priority',
+        'sentiment_label',
+        'sentiment_score',
         'status',
         'is_anonymous',
         'attachment_path',
+        'due_at',
+        'escalated_at',
+        'sla_hours',
         'resolved_at',
+        'resolution_summary',
     ];
 
     protected function casts(): array
     {
         return [
             'is_anonymous' => 'boolean',
+            'due_at' => 'datetime',
+            'escalated_at' => 'datetime',
             'resolved_at' => 'datetime',
         ];
     }
@@ -48,6 +58,11 @@ class Grievance extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    public function escalatedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'escalated_to');
+    }
+
     public function updates(): HasMany
     {
         return $this->hasMany(GrievanceUpdate::class);
@@ -56,5 +71,10 @@ class Grievance extends Model
     public function feedback(): HasOne
     {
         return $this->hasOne(Feedback::class);
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->status !== 'Resolved' && $this->due_at !== null && $this->due_at->isPast();
     }
 }

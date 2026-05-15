@@ -15,8 +15,12 @@
         <p><strong>Status:</strong> {{ $grievance->status }}</p>
         <p><strong>Priority:</strong> <span class="badge {{ $grievance->priority }}">{{ $grievance->priority }}</span></p>
         <p><strong>Category:</strong> {{ $grievance->category }}</p>
+        <p><strong>AI Category:</strong> {{ $grievance->ai_category ?? 'Pending' }}</p>
+        <p><strong>Sentiment:</strong> <span class="badge {{ $grievance->sentiment_label ?? 'Neutral' }}">{{ $grievance->sentiment_label ?? 'Neutral' }}</span></p>
         <p><strong>Submitted by:</strong> {{ $grievance->is_anonymous ? 'Anonymous' : ($grievance->user?->name ?? 'User removed') }}</p>
         <p><strong>Assigned to:</strong> {{ $grievance->assignee?->name ?? 'Unassigned' }}</p>
+        <p><strong>SLA deadline:</strong> {{ $grievance->due_at?->format('d M Y, h:i A') ?? 'Not set' }}</p>
+        <p><strong>Escalated to:</strong> {{ $grievance->escalatedTo?->name ?? 'Not escalated' }}</p>
         <p>{{ $grievance->description }}</p>
         @if ($grievance->attachment_path)
             <p><a class="btn secondary" href="{{ asset('storage/'.$grievance->attachment_path) }}" target="_blank">View attachment</a></p>
@@ -45,6 +49,10 @@
                 <div>
                     <label>Progress note</label>
                     <textarea name="note"></textarea>
+                </div>
+                <div>
+                    <label>Resolution summary</label>
+                    <textarea name="resolution_summary">{{ old('resolution_summary', $grievance->resolution_summary) }}</textarea>
                 </div>
                 <button class="btn" type="submit">Update ticket</button>
             </form>
@@ -79,6 +87,9 @@
         @if ($grievance->feedback)
             <p><strong>Rating:</strong> {{ $grievance->feedback->rating }}/5</p>
             <p>{{ $grievance->feedback->comments }}</p>
+            @if ($grievance->resolution_summary)
+                <p><strong>Resolution summary:</strong> {{ $grievance->resolution_summary }}</p>
+            @endif
         @elseif ($grievance->status === 'Resolved' && $grievance->user_id === auth()->id())
             <form method="POST" action="{{ route('feedback.store', $grievance) }}" class="grid">
                 @csrf
