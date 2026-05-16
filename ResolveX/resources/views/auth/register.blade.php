@@ -1,47 +1,54 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="card">
-    <span class="soft-note">Onboard your startup team</span>
-    <h1 class="title" style="margin-top:18px;">Create account</h1>
-    <p class="subtitle">Register as a founder or employee and start managing issues in a more structured way.</p>
+<div class="card">
+    <h2 style="margin-top:0">Create Account</h2>
+    <p style="opacity: 0.6; margin-bottom: 24px;">Join the ResolveX platform for your startup.</p>
 
-    <form method="POST" action="{{ route('register') }}" class="grid" style="margin-top:20px">
+    <form method="POST" action="{{ route('register') }}" style="display: grid; gap: 16px;">
         @csrf
-        <div>
-            <label>Name</label>
-            <input name="name" value="{{ old('name') }}" required>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+                <label style="display:block; margin-bottom: 8px; font-weight: 700;">Full Name</label>
+                <input type="text" name="name" value="{{ old('name') }}" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+                <label style="display:block; margin-bottom: 8px; font-weight: 700;">Email Address</label>
+                <input type="email" name="email" value="{{ old('email') }}" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
         </div>
-        <div>
-            <label>Email</label>
-            <input name="email" type="email" value="{{ old('email') }}" required>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+                <label style="display:block; margin-bottom: 8px; font-weight: 700;">Startup Name</label>
+                <input type="text" name="startup_name" value="{{ old('startup_name') }}" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+                <label style="display:block; margin-bottom: 8px; font-weight: 700;">Role</label>
+                <select name="user_type" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                    <option value="founder">Founder</option>
+                    <option value="employee">Employee</option>
+                </select>
+            </div>
         </div>
-        <div>
-            <label>Startup role</label>
-            <select name="user_type" required>
-                <option value="founder" @selected(old('user_type', 'founder') === 'founder')>Founder</option>
-                <option value="employee" @selected(old('user_type') === 'employee')>Employee</option>
-            </select>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+                <label style="display:block; margin-bottom: 8px; font-weight: 700;">Password</label>
+                <input type="password" name="password" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+                <label style="display:block; margin-bottom: 8px; font-weight: 700;">Confirm Password</label>
+                <input type="password" name="password_confirmation" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
         </div>
-        <div>
-            <label>Startup name</label>
-            <input name="startup_name" value="{{ old('startup_name') }}">
-        </div>
-        <div class="full">
-            <label>Phone</label>
-            <input name="phone" value="{{ old('phone') }}">
-        </div>
-        <div>
-            <label>Password</label>
-            <input name="password" type="password" required>
-        </div>
-        <div>
-            <label>Confirm password</label>
-            <input name="password_confirmation" type="password" required>
-        </div>
-        <button class="btn" type="submit">Register</button>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">Register Account</button>
     </form>
 
-    <p class="subtitle" style="margin-top:16px">Already registered? <a href="{{ route('login') }}"><strong>Login</strong></a></p>
-</section>
+    <div style="margin-top: 24px; text-align: center; font-size: 14px;">
+        <span style="opacity: 0.6;">Already have an account?</span>
+        <a href="{{ route('login') }}" style="color: var(--brand); font-weight: 700;">Login here</a>
+    </div>
+</div>
 @endsection

@@ -1,114 +1,108 @@
 @extends('admin.layout')
 
-@section('title', 'User Management')
+@section('title', 'Identity & Access')
 
 @section('admin-content')
-<div class="stack">
-    <section class="hero-panel">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; position:relative; z-index:1;">
-            <div>
-                <div style="text-transform:uppercase; letter-spacing:0.12em; font-size:12px; font-weight:800; opacity:0.8;">Identity and access</div>
-                <h2 style="margin:10px 0 8px; font-size:32px; font-family:'Space Grotesk', 'Manrope', sans-serif;">Manage founders, employees, and staff access</h2>
-                <p class="subtitle" style="max-width:640px;">Adjust roles, deactivate accounts, and keep moderation ownership clear across the platform.</p>
-            </div>
-            <a href="{{ route('admin.dashboard') }}" class="btn secondary">Back to admin</a>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+    <div>
+        <h1 style="font-size: 36px; font-weight: 900; margin: 0; letter-spacing: -1px;">Identity <span style="color: var(--brand);">Access</span></h1>
+        <p style="opacity: 0.5; margin-top: 10px; font-size: 16px;">Manage startup founders, employees, and administrative oversight.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <div class="card" style="padding: 10px 20px; border-radius: 16px; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="font-size: 13px; font-weight: 700;">{{ $stats['total_users'] }} Total Active</span>
         </div>
-    </section>
+    </div>
+</div>
 
-    <section class="grid grid-4">
-        <div class="card"><div class="muted">Total users</div><div class="stat">{{ $stats['total_users'] }}</div></div>
-        <div class="card"><div class="muted">Admins</div><div class="stat">{{ $stats['admin_count'] }}</div></div>
-        <div class="card"><div class="muted">Moderators</div><div class="stat">{{ $stats['moderator_count'] }}</div></div>
-        <div class="card"><div class="muted">Regular users</div><div class="stat">{{ $stats['user_count'] }}</div></div>
-    </section>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px;">
+    <div class="card">
+        <div style="font-size: 11px; font-weight: 800; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Admins</div>
+        <div style="font-size: 28px; font-weight: 900;">{{ $stats['admin_count'] }}</div>
+    </div>
+    <div class="card">
+        <div style="font-size: 11px; font-weight: 800; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Moderators</div>
+        <div style="font-size: 28px; font-weight: 900;">{{ $stats['moderator_count'] }}</div>
+    </div>
+    <div class="card">
+        <div style="font-size: 11px; font-weight: 800; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Startups</div>
+        <div style="font-size: 28px; font-weight: 900;">{{ $stats['user_count'] }}</div>
+    </div>
+</div>
 
-    <form method="GET" class="card filters">
-        <div>
-            <label>Search</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, email, startup">
+<div class="card" style="margin-bottom: 30px; border-radius: 24px; background: rgba(255,107,0,0.02);">
+    <form method="GET" style="display: flex; gap: 16px; align-items: center; padding: 5px;">
+        <div style="flex: 1; position: relative;">
+            <svg style="position: absolute; left: 16px; top: 12px; width: 18px; height: 18px; opacity: 0.3;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input name="search" value="{{ request('search') }}" placeholder="Search by name, email or startup..." style="width: 100%; padding: 10px 10px 10px 46px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
         </div>
-        <div>
-            <label>Role</label>
-            <select name="role">
-                <option value="">All roles</option>
-                <option value="admin" @selected(request('role') === 'admin')>Admin</option>
-                <option value="moderator" @selected(request('role') === 'moderator')>Moderator</option>
-                <option value="user" @selected(request('role') === 'user')>User</option>
-            </select>
-        </div>
-        <div>
-            <label>Status</label>
-            <select name="status">
-                <option value="">All</option>
-                <option value="active" @selected(request('status') === 'active')>Active</option>
-                <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
-            </select>
-        </div>
-        <button class="btn" type="submit">Apply</button>
+        <select name="role" style="padding: 10px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 600;">
+            <option value="">All Roles</option>
+            <option value="admin" @selected(request('role') === 'admin')>Admin</option>
+            <option value="moderator" @selected(request('role') === 'moderator')>Moderator</option>
+            <option value="user" @selected(request('role') === 'user')>User</option>
+        </select>
+        <button type="submit" class="btn btn-secondary">Apply</button>
     </form>
+</div>
 
-    <section class="card">
-        <div style="overflow:auto;">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Startup role</th>
-                        <th>Platform role</th>
-                        <th>Status</th>
-                        <th>Grievances</th>
-                        <th>Notifications</th>
-                        <th>Joined</th>
-                        <th>Actions</th>
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 24px;">
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: rgba(255,107,0,0.05); border-bottom: 1px solid var(--border);">
+                    <th style="padding: 20px; font-size: 12px; font-weight: 800; opacity: 0.5; text-transform: uppercase;">User Identity</th>
+                    <th style="padding: 20px; font-size: 12px; font-weight: 800; opacity: 0.5; text-transform: uppercase;">Startup Context</th>
+                    <th style="padding: 20px; font-size: 12px; font-weight: 800; opacity: 0.5; text-transform: uppercase;">Platform Role</th>
+                    <th style="padding: 20px; font-size: 12px; font-weight: 800; opacity: 0.5; text-transform: uppercase;">Access</th>
+                    <th style="padding: 20px; font-size: 12px; font-weight: 800; opacity: 0.5; text-transform: uppercase;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($users as $user)
+                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,107,0,0.01)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 20px;">
+                            <div style="font-weight: 800; font-size: 15px;">{{ $user->name }}</div>
+                            <div style="font-size: 12px; opacity: 0.5; margin-top: 2px;">{{ $user->email }}</div>
+                        </td>
+                        <td style="padding: 20px;">
+                            <div style="font-weight: 700; font-size: 13px;">{{ $user->startup_name ?: 'Independent' }}</div>
+                            <div style="font-size: 11px; opacity: 0.5;">{{ ucfirst($user->user_type) }}</div>
+                        </td>
+                        <td style="padding: 20px;">
+                            <form method="POST" action="{{ route('admin.users.update-role', $user) }}">
+                                @csrf
+                                @method('PUT')
+                                <select name="role" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
+                                    <option value="user" @selected($user->role === 'user')>User</option>
+                                    <option value="moderator" @selected($user->role === 'moderator')>Moderator</option>
+                                    <option value="admin" @selected($user->role === 'admin')>Admin</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td style="padding: 20px;">
+                            <span class="badge {{ $user->is_active ? 'Resolved' : 'High' }}" style="font-size: 10px;">
+                                {{ $user->is_active ? 'Active' : 'Revoked' }}
+                            </span>
+                        </td>
+                        <td style="padding: 20px;">
+                            <form method="POST" action="{{ route('admin.users.status', $user) }}">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px; border-radius: 8px;">
+                                    {{ $user->is_active ? 'Revoke Access' : 'Restore Access' }}
+                                </button>
+                            </form>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($users as $user)
-                        <tr>
-                            <td>
-                                <strong>{{ $user->name }}</strong><br>
-                                <small class="muted">{{ $user->email }}</small><br>
-                                <small class="muted">{{ $user->startup_name ?: 'No startup listed' }}</small>
-                            </td>
-                            <td>{{ ucfirst($user->user_type) }}</td>
-                            <td>
-                                <form method="POST" action="{{ route('admin.users.update-role', $user) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <select name="role" onchange="this.form.submit()">
-                                        <option value="user" @selected($user->role === 'user')>User</option>
-                                        <option value="moderator" @selected($user->role === 'moderator')>Moderator</option>
-                                        <option value="admin" @selected($user->role === 'admin')>Admin</option>
-                                    </select>
-                                </form>
-                            </td>
-                            <td><span class="badge {{ $user->is_active ? 'Resolved' : 'High' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span></td>
-                            <td>{{ $user->grievances_count }}</td>
-                            <td>
-                                <div class="muted" style="font-size:12px;">Email: {{ $user->wants_email_notifications ? 'On' : 'Off' }}</div>
-                                <div class="muted" style="font-size:12px;">In-app: {{ $user->wants_in_app_notifications ? 'On' : 'Off' }}</div>
-                            </td>
-                            <td>{{ $user->created_at->format('M d, Y') }}</td>
-                            <td>
-                                <form method="POST" action="{{ route('admin.users.status', $user) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <button class="btn secondary" type="submit">{{ $user->is_active ? 'Deactivate' : 'Reactivate' }}</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="muted">No users found for the current filter.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        <div style="margin-top:16px;">
-            {{ $users->links() }}
-        </div>
-    </section>
+<div style="margin-top: 30px;">
+    {{ $users->links() }}
 </div>
 @endsection

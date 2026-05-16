@@ -1,28 +1,32 @@
 @extends('layouts.app')
 
 @section('content')
-<section class="card" style="padding:28px;">
-    <span class="soft-note">Secure workspace access</span>
-    <h1 class="title" style="margin-top:18px;">Sign in</h1>
-    <p class="subtitle">Step back into the grievance workspace and keep every case moving.</p>
+<div class="card">
+    <h2 style="margin-top:0">Welcome Back</h2>
+    <p style="opacity: 0.6; margin-bottom: 24px;">Sign in to manage your startup grievances.</p>
 
-    <form method="POST" action="{{ route('login') }}" class="grid" style="margin-top:20px">
+    <form method="POST" action="{{ route('login') }}" style="display: grid; gap: 16px;">
         @csrf
         <div>
-            <label>Email</label>
-            <input name="email" type="email" value="{{ old('email') }}" required autofocus>
+            <label style="display:block; margin-bottom: 8px; font-weight: 700;">Email Address</label>
+            <input type="email" name="email" value="{{ old('email') }}" required autofocus style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
         </div>
         <div>
-            <label>Password</label>
-            <input name="password" type="password" required>
+            <label style="display:block; margin-bottom: 8px; font-weight: 700;">Password</label>
+            <input type="password" name="password" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
         </div>
-        <button class="btn" type="submit">Login</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">Sign In</button>
     </form>
 
-    <div class="card" style="margin-top:18px; padding:18px; border-radius:20px; background:linear-gradient(180deg, #fbfdff, #eef4fa);">
-        <div style="font-weight:800; margin-bottom:8px;">Demo access</div>
-        <div class="subtitle" style="margin:0;">Admin: <strong>admin@resolvex.test</strong> / <strong>password</strong></div>
+    <div style="margin-top: 24px; text-align: center; font-size: 14px;">
+        <span style="opacity: 0.6;">Don't have an account?</span>
+        <a href="{{ route('register') }}" style="color: var(--brand); font-weight: 700;">Register here</a>
     </div>
-    <p class="subtitle" style="margin-top:16px">New founder or employee? <a href="{{ route('register') }}"><strong>Create account</strong></a></p>
-</section>
+
+    <div style="margin-top: 30px; padding: 20px; border-radius: 20px; background: rgba(255,107,0,0.05); border: 1px solid var(--border);">
+        <div style="font-weight: 800; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; color: var(--brand);">Demo Access</div>
+        <div style="font-size: 13px; opacity: 0.8;">Admin: admin@resolvex.test</div>
+        <div style="font-size: 13px; opacity: 0.8;">Pass: password</div>
+    </div>
+</div>
 @endsection
