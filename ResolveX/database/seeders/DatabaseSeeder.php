@@ -10,9 +10,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['name' => 'Admin User', 'email' => 'admin@resolvex.test', 'role' => 'admin'],
-            ['name' => 'Moderator User', 'email' => 'moderator@resolvex.test', 'role' => 'moderator'],
-            ['name' => 'Founder User', 'email' => 'founder@resolvex.test', 'role' => 'user'],
+            ['name' => 'Admin User', 'email' => 'admin@gmail.com', 'role' => 'admin'],
+            ['name' => 'Moderator User', 'email' => 'moderator@gmail.com', 'role' => 'moderator'],
+            ['name' => 'Founder User', 'email' => 'founder@gmail.com', 'role' => 'user'],
         ];
 
         foreach ($users as $user) {

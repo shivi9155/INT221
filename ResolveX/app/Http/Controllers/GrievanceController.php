@@ -116,6 +116,14 @@ class GrievanceController extends Controller
             'Your grievance has been submitted and is now waiting for review.'
         );
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Ticket {$ticketId} submitted.",
+                'redirect' => route('grievances.show', $grievance)
+            ]);
+        }
+
         return redirect()->route('grievances.show', $grievance)->with('status', "Ticket {$ticketId} submitted.");
     }
 

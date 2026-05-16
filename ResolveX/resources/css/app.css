@@ -25,3 +25,102 @@
     @apply transition-colors duration-300;
   }
 }
+
+/* ============================================
+   Badge System — used across all views
+   ============================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+    border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+/* Status badges */
+.badge.Submitted       { background: rgba(59,130,246,0.1);  color: #3b82f6;  border-color: rgba(59,130,246,0.2); }
+.badge.UnderReview     { background: rgba(245,158,11,0.1);  color: #f59e0b;  border-color: rgba(245,158,11,0.2); }
+.badge.InProgress      { background: rgba(139,92,246,0.1);  color: #8b5cf6;  border-color: rgba(139,92,246,0.2); }
+.badge.Resolved        { background: rgba(16,185,129,0.1);  color: #10b981;  border-color: rgba(16,185,129,0.2); }
+
+/* Priority badges */
+.badge.High            { background: rgba(239,68,68,0.1);   color: #ef4444;  border-color: rgba(239,68,68,0.2); }
+.badge.Medium          { background: rgba(245,158,11,0.1);  color: #f59e0b;  border-color: rgba(245,158,11,0.2); }
+.badge.Low             { background: rgba(16,185,129,0.1);  color: #10b981;  border-color: rgba(16,185,129,0.2); }
+
+/* Sentiment badges */
+.badge.Critical        { background: rgba(239,68,68,0.1);   color: #ef4444;  border-color: rgba(239,68,68,0.2); }
+.badge.Concerned       { background: rgba(245,158,11,0.1);  color: #f59e0b;  border-color: rgba(245,158,11,0.2); }
+.badge.Neutral         { background: rgba(100,116,139,0.1); color: #64748b;  border-color: rgba(100,116,139,0.2); }
+.badge.Calm            { background: rgba(16,185,129,0.1);  color: #10b981;  border-color: rgba(16,185,129,0.2); }
+
+/* ============================================
+   Sidebar overlay for mobile
+   ============================================ */
+@media (max-width: 768px) {
+    .shell { grid-template-columns: 1fr !important; }
+    .side  { display: none !important; }
+    .content { padding: 16px !important; }
+}
+
+/* ============================================
+   Smooth page transitions
+   ============================================ */
+.content > * {
+    animation: fadeUp 0.3s ease forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Input & select focus ring (global)
+   ============================================ */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+/* ============================================
+   Pagination — override default Laravel styles
+   ============================================ */
+nav[aria-label="Pagination Navigation"] {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+nav[aria-label="Pagination Navigation"] a,
+nav[aria-label="Pagination Navigation"] span {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+nav[aria-label="Pagination Navigation"] a:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+
+nav[aria-label="Pagination Navigation"] span[aria-current="page"] {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #000;
+}
+

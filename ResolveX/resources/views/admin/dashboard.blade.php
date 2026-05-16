@@ -9,6 +9,10 @@
         <p style="opacity: 0.5; margin-top: 10px; font-size: 16px;">Triage, escalate, and resolve grievances across the startup ecosystem.</p>
     </div>
     <div style="display: flex; gap: 12px;">
+        <a href="{{ route('admin.export') }}" class="btn btn-secondary">
+            <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Export CSV
+        </a>
         <a href="{{ route('admin.analytics') }}" class="btn btn-secondary">
             <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             System Analytics
@@ -19,6 +23,7 @@
         </a>
     </div>
 </div>
+
 
 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px;">
     <div class="card">

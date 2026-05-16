@@ -14,7 +14,7 @@ class GrievanceSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::where('email', 'founder@resolvex.test')->first();
+        $user = User::where('email', 'founder@gmail.com')->first();
 
         if ($user) {
             Grievance::create([

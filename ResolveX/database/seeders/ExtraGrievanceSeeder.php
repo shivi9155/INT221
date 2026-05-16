@@ -11,9 +11,9 @@ class ExtraGrievanceSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('email', 'founder@resolvex.test')->first();
-        $admin = User::where('email', 'admin@resolvex.test')->first();
-        $moderator = User::where('email', 'moderator@resolvex.test')->first();
+        $user = User::where('email', 'founder@gmail.com')->first();
+        $admin = User::where('email', 'admin@gmail.com')->first();
+        $moderator = User::where('email', 'moderator@gmail.com')->first();
 
         if (!$user) return;
 

@@ -3,14 +3,9 @@
 @section('title', $title ?? 'Admin Dashboard')
 
 @section('content')
-<div style="margin-bottom: 20px;">
-    <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">{{ $title ?? 'Admin Dashboard' }}</h1>
-    <p style="color: var(--muted);">Manage grievances and user communications</p>
-</div>
-
-@if(session('success'))
+@if(session('status') || session('success'))
     <div class="alert">
-        {{ session('success') }}
+        {{ session('status') ?? session('success') }}
     </div>
 @endif
 
@@ -26,3 +21,8 @@
 
 @yield('admin-content')
 @endsection
+
+@push('scripts')
+@yield('admin-scripts')
+@endpush
+

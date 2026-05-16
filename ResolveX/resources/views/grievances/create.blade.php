@@ -62,3 +62,73 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.querySelector('form').addEventListener('submit', async (e) => {
+        const form = e.target;
+        if (!form.hasAttribute('enctype')) return; // Ensure it's the correct form
+
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Processing...';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Show success and redirect
+                const alert = document.createElement('div');
+                alert.className = 'alert';
+                alert.style.position = 'fixed';
+                alert.style.top = '20px';
+                alert.style.right = '20px';
+                alert.style.zIndex = '9999';
+                alert.innerHTML = result.message;
+                document.body.appendChild(alert);
+                
+                setTimeout(() => {
+                    window.location.href = result.redirect;
+                }, 1000);
+            } else {
+                alert('Error: ' + (result.message || 'Validation failed'));
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        } catch (error) {
+            console.error(error);
+            alert('A network error occurred.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+</script>
+<style>
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0,0,0,0.1);
+        border-top-color: #000;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+@endpush

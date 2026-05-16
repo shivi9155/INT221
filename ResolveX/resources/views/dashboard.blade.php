@@ -64,18 +64,25 @@
             </div>
             
             <div style="display: grid; gap: 16px;">
-                @foreach ($recent as $item)
-                    <div style="display: grid; grid-template-columns: 80px 1fr 120px; align-items: center; padding: 16px; border-radius: 16px; background: var(--bg); border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
-                        <div style="font-size: 11px; font-weight: 800; opacity: 0.5;">{{ $item->ticket_id }}</div>
-                        <div>
-                            <div style="font-weight: 700; font-size: 14px;">{{ $item->subject }}</div>
-                            <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">{{ $item->category }} • {{ $item->created_at->diffForHumans() }}</div>
+                @forelse ($recent as $item)
+                    <a href="{{ route('grievances.show', $item) }}" style="text-decoration: none; color: inherit;">
+                        <div style="display: grid; grid-template-columns: 80px 1fr 120px; align-items: center; padding: 16px; border-radius: 16px; background: var(--bg); border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.01)'; this.style.borderColor='var(--brand)'" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='var(--border)'">
+                            <div style="font-size: 11px; font-weight: 800; opacity: 0.5;">{{ $item->ticket_id }}</div>
+                            <div>
+                                <div style="font-weight: 700; font-size: 14px;">{{ $item->subject }}</div>
+                                <div style="font-size: 12px; opacity: 0.4; margin-top: 2px;">{{ $item->category }} • {{ $item->created_at->diffForHumans() }}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="badge {{ str_replace(' ', '', $item->status) }}" style="font-size: 10px;">{{ $item->status }}</span>
+                            </div>
                         </div>
-                        <div style="text-align: right;">
-                            <span class="badge {{ $item->status }}" style="font-size: 10px;">{{ $item->status }}</span>
-                        </div>
+                    </a>
+                @empty
+                    <div style="text-align: center; padding: 40px; opacity: 0.4;">
+                        <svg style="width:40px;height:40px;margin:0 auto 12px;display:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <p style="font-size: 14px;">No grievances yet. File your first ticket!</p>
                     </div>
-                @endforeach
+                @endforelse
             </div>
         </div>
     </div>
@@ -89,9 +96,20 @@
                     <svg style="width:20px;height:20px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     File New Grievance
                 </a>
+                @if(auth()->user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="btn" style="width: 100%; justify-content: center; background: rgba(255,107,0,0.15); border: 1px solid rgba(255,107,0,0.3); color: var(--brand); padding: 14px;">
+                    <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Command Center
+                </a>
+                <a href="{{ route('admin.analytics') }}" class="btn" style="width: 100%; justify-content: center; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); padding: 14px;">
+                    <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    System Analytics
+                </a>
+                @else
                 <a href="{{ route('profile.edit') }}" class="btn btn-secondary" style="width: 100%; justify-content: center; border-color: rgba(255,255,255,0.1); color: white;">
                     Manage Profile
                 </a>
+                @endif
             </div>
         </div>
 
