@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('user_type')->default('founder')->after('role');
-            $table->boolean('is_active')->default(true)->after('phone');
-            $table->boolean('wants_email_notifications')->default(true)->after('is_active');
-            $table->boolean('wants_in_app_notifications')->default(true)->after('wants_email_notifications');
+            $table->string('user_type')->default('founder');
+            $table->boolean('is_active')->default(true);
+            $table->boolean('wants_email_notifications')->default(true);
+            $table->boolean('wants_in_app_notifications')->default(true);
         });
     }
 

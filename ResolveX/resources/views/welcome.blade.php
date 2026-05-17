@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
+    <script>
+        // Pre-detect theme to prevent FOUC
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+        })();
+    </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,6 +35,10 @@
         <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
+                    <button id="theme-toggle" class="inline-flex items-center justify-center p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors" title="Toggle Theme" style="cursor: pointer; border: none; background: transparent;">
+                        <svg id="sun-icon" class="hidden w-5 h-5 text-[#1b1b18] dark:text-[#EDEDEC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="moon-icon" class="w-5 h-5 text-[#1b1b18] dark:text-[#EDEDEC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+                    </button>
                     @auth
                         <a
                             href="{{ url('/dashboard') }}"
@@ -273,5 +289,62 @@
         @if (Route::has('login'))
             <div class="h-14.5 hidden lg:block"></div>
         @endif
+
+        <script>
+            // Theme Management System
+            const initTheme = () => {
+                const html = document.documentElement;
+                const themeToggle = document.getElementById('theme-toggle');
+                const sunIcon = document.getElementById('sun-icon');
+                const moonIcon = document.getElementById('moon-icon');
+
+                const updateIcons = (isDark) => {
+                    if (sunIcon && moonIcon) {
+                        if (isDark) {
+                            sunIcon.classList.remove('hidden');
+                            moonIcon.classList.add('hidden');
+                        } else {
+                            sunIcon.classList.add('hidden');
+                            moonIcon.classList.remove('hidden');
+                        }
+                    }
+                };
+
+                const setTheme = (theme) => {
+                    if (theme === 'dark') {
+                        html.classList.add('dark');
+                        localStorage.theme = 'dark';
+                        updateIcons(true);
+                    } else {
+                        html.classList.remove('dark');
+                        localStorage.theme = 'light';
+                        updateIcons(false);
+                    }
+                };
+
+                // Detect initial theme preference
+                if (localStorage.theme === 'light') {
+                    setTheme('light');
+                } else if (localStorage.theme === 'dark') {
+                    setTheme('dark');
+                } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    setTheme('dark');
+                } else {
+                    setTheme('light');
+                }
+
+                // Toggle theme on button click
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const isDark = html.classList.contains('dark');
+                        setTheme(isDark ? 'light' : 'dark');
+                    });
+                }
+            };
+
+            // Initialize theme immediately and on page load
+            initTheme();
+        </script>
     </body>
 </html>

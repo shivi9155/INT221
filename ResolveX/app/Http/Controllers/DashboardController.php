@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Grievance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -24,12 +25,23 @@ class DashboardController extends Controller
             'overdue' => (clone $baseQuery)->where('status', '!=', 'Resolved')->whereNotNull('due_at')->where('due_at', '<', now())->count(),
         ];
 
-        $monthly = (clone $baseQuery)
-            ->selectRaw("strftime('%Y-%m', created_at) as month, count(*) as total")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->limit(6)
-            ->pluck('total', 'month');
+        $driver = DB::connection()->getDriverName();
+        $monthly = [];
+
+        if ($driver === 'mongodb') {
+            $monthly = (clone $baseQuery)->get()
+                ->groupBy(fn ($g) => $g->created_at?->format('Y-m') ?? 'Unknown')
+                ->map(fn ($group) => $group->count())
+                ->sortKeys()
+                ->take(6);
+        } else {
+            $monthly = (clone $baseQuery)
+                ->selectRaw("strftime('%Y-%m', created_at) as month, count(*) as total")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->limit(6)
+                ->pluck('total', 'month');
+        }
 
         $recent = (clone $baseQuery)
             ->with(['user', 'assignee', 'feedback'])

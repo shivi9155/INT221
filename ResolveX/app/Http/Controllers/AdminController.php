@@ -154,20 +154,42 @@ class AdminController extends Controller
 
         $monthlyCounts = $this->buildMonthlyCounts();
 
-        $topCategories = Grievance::query()
-            ->select('category', DB::raw('count(*) as count'))
-            ->groupBy('category')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get();
+        $topCategories = [];
+        $mostActiveUsers = [];
 
-        $mostActiveUsers = User::query()
-            ->select('users.id', 'users.name', DB::raw('count(grievances.id) as grievance_count'))
-            ->join('grievances', 'grievances.user_id', '=', 'users.id')
-            ->groupBy('users.id', 'users.name')
-            ->orderByDesc('grievance_count')
-            ->limit(5)
-            ->get();
+        if (DB::connection()->getDriverName() === 'mongodb') {
+            $topCategories = Grievance::all()
+                ->groupBy('category')
+                ->map(fn ($group, $category) => (object)['category' => $category, 'count' => $group->count()])
+                ->sortByDesc('count')
+                ->take(5)
+                ->values();
+
+            $mostActiveUsers = User::with('grievances')->get()
+                ->map(fn ($u) => (object)[
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'grievance_count' => $u->grievances->count()
+                ])
+                ->sortByDesc('grievance_count')
+                ->take(5)
+                ->values();
+        } else {
+            $topCategories = Grievance::query()
+                ->select('category', DB::raw('count(*) as count'))
+                ->groupBy('category')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->get();
+
+            $mostActiveUsers = User::query()
+                ->select('users.id', 'users.name', DB::raw('count(grievances.id) as grievance_count'))
+                ->join('grievances', 'grievances.user_id', '=', 'users.id')
+                ->groupBy('users.id', 'users.name')
+                ->orderByDesc('grievance_count')
+                ->limit(5)
+                ->get();
+        }
 
         $analytics = [
             'total_grievances' => $totalGrievances,
@@ -249,7 +271,7 @@ class AdminController extends Controller
 
     public function users(Request $request): View
     {
-        $query = User::query()->withCount('grievances')->latest();
+        $query = User::query()->latest();
 
         if ($request->filled('search')) {
             $search = $request->string('search');
@@ -302,6 +324,15 @@ class AdminController extends Controller
     private function buildMonthlyCounts(): Collection
     {
         $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'mongodb') {
+            return Grievance::all()
+                ->groupBy(fn ($g) => $g->created_at?->format('Y-m') ?? 'Unknown')
+                ->map(fn ($group) => $group->count())
+                ->sortKeys()
+                ->take(6);
+        }
+
         $monthExpression = match ($driver) {
             'sqlite' => "strftime('%Y-%m', created_at)",
             'mysql', 'mariadb' => "DATE_FORMAT(created_at, '%Y-%m')",

@@ -1,6 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
+    <script>
+        // Pre-detect theme to prevent FOUC
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+        })();
+    </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -14,17 +26,33 @@
     <style>
         :root {
             --brand: #ff6b00;
+            --brand-deep: #cc5600;
+            --bg: #ffffff;
+            --text: #0a0a0a;
+            --text-secondary: #6b7280;
+            --card-bg: #f8f9fa;
+            --card-hover: #f0f1f3;
+            --border: #e5e7eb;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --nav-bg: rgba(255,255,255,0.8);
+        }
+
+        html.dark {
             --bg: #0a0a0a;
             --text: #ffffff;
+            --text-secondary: #a0a0a0;
             --card-bg: #141414;
+            --card-hover: #1a1a1a;
             --border: #262626;
+            --shadow: 0 20px 50px rgba(0,0,0,0.3);
+            --nav-bg: rgba(10,10,10,0.8);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Instrument Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
         a { text-decoration: none; }
 
         /* NAV */
-        .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); transition: background 0.3s, border-color 0.3s; }
         .nav-brand { font-size: 22px; font-weight: 900; display: flex; align-items: center; gap: 10px; }
         .brand-dot { width: 28px; height: 28px; background: var(--brand); border-radius: 8px; }
         .nav-links { display: flex; gap: 32px; align-items: center; }
@@ -35,7 +63,7 @@
         .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; font-size: 14px; border: none; }
         .btn-primary { background: var(--brand); color: #000; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,0,0.35); }
-        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--text); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-outline:hover { border-color: var(--brand); color: var(--brand); }
 
         /* HERO */
@@ -83,7 +111,59 @@
         .cta-section p { font-size: 16px; opacity: 0.5; margin-bottom: 40px; }
 
         /* FOOTER */
-        .footer { padding: 40px 60px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; opacity: 0.4; font-size: 13px; }
+        .footer { padding: 40px 60px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; opacity: 0.6; font-size: 13px; }
+
+        /* ANIMATIONS */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+        .delay-400 { transition-delay: 0.4s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+
+        .hero-title-grad {
+            background: linear-gradient(to right, var(--text) 20%, var(--brand) 40%, var(--brand) 60%, var(--text) 80%);
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 8s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-8px) scale(1.02); }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--brand);
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-toggle:hover { 
+            background: var(--card-hover); 
+            transform: rotate(15deg) scale(1.1);
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -97,6 +177,10 @@
     <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#how">How it works</a>
+        <button id="theme-toggle" class="theme-toggle" title="Toggle Theme">
+            <svg id="sun-icon" class="hidden" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg id="moon-icon" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+        </button>
         <a href="{{ route('login') }}" class="btn btn-outline" style="padding: 8px 20px; font-size: 13px;">Sign In</a>
         <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 8px 20px; font-size: 13px;">Get Started</a>
     </div>
@@ -104,12 +188,12 @@
 
 {{-- HERO --}}
 <section class="hero">
-    <div class="hero-badge">
+    <div class="hero-badge reveal float-anim">
         <span></span> AI-powered grievance intelligence
     </div>
-    <h1>Resolve Startup <span>Grievances</span><br>at Machine Speed</h1>
-    <p>ResolveX brings SLA tracking, sentiment analysis, and role-based triage to your startup's internal operations — all in one platform.</p>
-    <div class="hero-cta">
+    <h1 class="reveal delay-100"><span class="hero-title-grad">Resolve Startup</span><br>Grievances at Speed</h1>
+    <p class="reveal delay-200">ResolveX brings SLA tracking, sentiment analysis, and role-based triage to your startup's internal operations — all in one platform.</p>
+    <div class="hero-cta reveal delay-300">
         <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 16px 36px; font-size: 16px;">
             Start for free
             <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -138,47 +222,47 @@
 
 {{-- FEATURES --}}
 <section class="section" id="features">
-    <div class="section-label">Platform Features</div>
-    <h2>Everything your startup needs<br>to resolve issues fast</h2>
-    <p>Built for founders, employees, and administrators who need clarity and speed.</p>
+    <div class="section-label reveal">Platform Features</div>
+    <h2 class="reveal delay-100">Everything your startup needs<br>to resolve issues fast</h2>
+    <p class="reveal delay-200">Built for founders, employees, and administrators who need clarity and speed.</p>
 
     <div class="features">
-        <div class="feature-card">
+        <div class="feature-card reveal hover-lift delay-100">
             <div class="feature-icon">
                 <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
             </div>
             <h3>AI-Powered Classification</h3>
             <p>Every ticket is automatically categorized and given a sentiment score, so the right team sees it first.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card reveal hover-lift delay-200">
             <div class="feature-icon">
                 <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <h3>SLA Tracking & Escalation</h3>
             <p>Automatic SLA deadlines with smart escalation logic. Overdue tickets surface immediately to leadership.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card reveal hover-lift delay-300">
             <div class="feature-icon">
                 <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
             <h3>Role-Based Access Control</h3>
             <p>Admins, moderators, and users each have isolated, purpose-built dashboards. No data leakage.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card reveal hover-lift delay-100">
             <div class="feature-icon">
                 <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             </div>
             <h3>Real-Time Analytics</h3>
             <p>Track resolution rates, response times, category trends, and satisfaction scores with live charts.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card reveal hover-lift delay-200">
             <div class="feature-icon">
                 <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             </div>
             <h3>CSV Export & Reporting</h3>
             <p>Export full grievance datasets to CSV instantly. Perfect for board presentations and compliance audits.</p>
         </div>
-        <div class="feature-card">
+        <div class="feature-card reveal hover-lift delay-300">
             <div class="feature-icon">
                 <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
             </div>
@@ -193,21 +277,21 @@
     <div class="section-label">How It Works</div>
     <h2>From submission to resolution<br>in three steps</h2>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 20px;">
-        <div style="display: flex; gap: 20px; align-items: flex-start;">
+        <div class="reveal delay-100" style="display: flex; gap: 20px; align-items: flex-start;">
             <div style="width: 48px; height: 48px; background: var(--brand); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #000; flex-shrink: 0;">1</div>
             <div>
                 <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">File a Ticket</h3>
                 <p style="font-size: 14px; opacity: 0.55; line-height: 1.7;">Submit your grievance with category, priority, and description. Attach files if needed.</p>
             </div>
         </div>
-        <div style="display: flex; gap: 20px; align-items: flex-start;">
+        <div class="reveal delay-200" style="display: flex; gap: 20px; align-items: flex-start;">
             <div style="width: 48px; height: 48px; background: rgba(255,107,0,0.15); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: var(--brand); flex-shrink: 0;">2</div>
             <div>
                 <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">AI Triages It</h3>
                 <p style="font-size: 14px; opacity: 0.55; line-height: 1.7;">The system analyzes sentiment, assigns categories, and routes to the right team automatically.</p>
             </div>
         </div>
-        <div style="display: flex; gap: 20px; align-items: flex-start;">
+        <div class="reveal delay-300" style="display: flex; gap: 20px; align-items: flex-start;">
             <div style="width: 48px; height: 48px; background: rgba(16,185,129,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #10b981; flex-shrink: 0;">3</div>
             <div>
                 <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Track & Resolve</h3>
@@ -238,6 +322,88 @@
     <div>Built with Laravel & AI Intelligence</div>
 </footer>
 
+    <script>
+        // Theme Management System
+        const initTheme = () => {
+            const html = document.documentElement;
+            const themeToggle = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+
+            const updateIcons = (isDark) => {
+                if (sunIcon && moonIcon) {
+                    if (isDark) {
+                        sunIcon.classList.remove('hidden');
+                        moonIcon.classList.add('hidden');
+                    } else {
+                        sunIcon.classList.add('hidden');
+                        moonIcon.classList.remove('hidden');
+                    }
+                }
+            };
+
+            const setTheme = (theme) => {
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    updateIcons(true);
+                } else {
+                    html.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    updateIcons(false);
+                }
+            };
+
+            // Detect initial theme preference
+            if (localStorage.theme === 'light') {
+                setTheme('light');
+            } else if (localStorage.theme === 'dark') {
+                setTheme('dark');
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            } else {
+                setTheme('dark');
+            }
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const isDark = html.classList.contains('dark');
+                    setTheme(isDark ? 'light' : 'dark');
+                });
+            }
+        };
+
+        // Scroll Reveal System
+        const initReveal = () => {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            // Fallback for browsers that don't support IntersectionObserver or if script fails
+            if (!('IntersectionObserver' in window)) {
+                reveals.forEach(el => el.classList.add('active'));
+                return;
+            }
+
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            reveals.forEach(el => observer.observe(el));
+        };
+
+        initTheme();
+        initReveal();
+    </script>
 </body>
 </html>
 

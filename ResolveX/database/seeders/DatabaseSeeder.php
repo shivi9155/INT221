@@ -28,6 +28,9 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $this->call(GrievanceSeeder::class);
+        $this->call([
+            GrievanceSeeder::class,
+            ExtraGrievanceSeeder::class,
+        ]);
     }
 }

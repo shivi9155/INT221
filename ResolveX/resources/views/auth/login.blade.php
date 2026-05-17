@@ -62,16 +62,6 @@
                 @endif
             </div>
             
-            <div style="margin-top: 30px; padding: 20px; border-radius: 20px; background: rgba(255,107,0,0.05); border: 1px solid var(--border);">
-                <div style="font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: var(--brand); display: flex; align-items: center; gap: 6px;">
-                    <svg style="width:14px;height:14px" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                    {{ ($portal ?? 'user') === 'admin' ? 'Admin Credentials' : 'User Credentials' }}
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                    <span style="opacity: 0.6;">Email: {{ $sampleEmail ?? 'founder@gmail.com' }}</span>
-                    <span style="opacity: 0.6;">Pass: password</span>
-                </div>
-            </div>
         </div>
     </div>
 </div>
